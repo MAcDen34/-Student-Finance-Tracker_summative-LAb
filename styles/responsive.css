@@ -1,0 +1,181 @@
+.main-nav {
+  display: none;
+}
+
+.mobile-menu-btn {
+  display: flex;
+}
+
+
+.form-row {
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+
+.table-wrapper {
+  display: none;
+}
+
+.records-cards {
+  display: block;
+}
+
+
+.stats-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.chart-container {
+  height: 120px;
+}
+
+
+.toolbar {
+  flex-direction: column;
+}
+
+.sort-select {
+  width: 100%;
+}
+
+
+.main-wrapper {
+  padding: var(--space-md);
+}
+
+.header-inner {
+  padding: var(--space-sm) var(--space-md);
+}
+
+
+@media (min-width: 360px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .record-card {
+    padding: var(--space-md) var(--space-lg);
+  }
+}
+
+
+@media (min-width: 768px) {
+
+  .main-nav {
+    display: flex;
+  }
+
+  .mobile-menu-btn {
+    display: none;
+  }
+
+  .mobile-drawer {
+    display: none !important;
+  }
+
+  .table-wrapper {
+    display: block;
+  }
+
+  .records-cards {
+    display: none;
+  }
+
+  .form-row {
+    flex-direction: row;
+  }
+
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .toolbar {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .sort-select {
+    width: auto;
+  }
+
+ 
+  .chart-container {
+    height: 160px;
+  }
+
+ 
+  .main-wrapper {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  
+  .about-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-content .about-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header-inner {
+    padding: var(--space-sm) var(--space-xl);
+  }
+
+  .main-wrapper {
+    padding: var(--space-2xl) var(--space-xl);
+  }
+
+ 
+  .stat-value {
+    font-size: 1.8rem;
+  }
+
+
+  .chart-container {
+    height: 180px;
+  }
+
+
+  .entry-form {
+    max-width: 650px;
+  }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  
+  .about-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+@media print {
+  .site-header,
+  .site-footer,
+  .toolbar,
+  .form-actions,
+  .row-actions,
+  .record-card-actions,
+  .mobile-menu-btn,
+  .theme-toggle-btn {
+    display: none !important;
+  }
+
+  .page-section {
+    display: block !important;
+    break-inside: avoid;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

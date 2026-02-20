@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniWallet |Tests</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; padding: 2rem; background: #faf6f0; color: #2c2417; }
+    h1 { margin-bottom: 1.5rem; font-size: 1.5rem; }
+    h2 { margin: 1.5rem 0 0.75rem; font-size: 1.15rem; color: #4a6a2e; border-bottom: 1px solid #e0d6c8; padding-bottom: 0.25rem; }
+    .test { padding: 0.5rem 0.75rem; margin: 0.25rem 0; border-radius: 6px; font-size: 0.88rem; }
+    .pass { background: #e4f5ec; color: #2a6e42; }
+    .fail { background: #fce8e6; color: #b8433a; font-weight: 600; }
+    .summary { margin-top: 2rem; padding: 1rem; border-radius: 8px; font-weight: 600; font-size: 1rem; }
+    .summary.all-pass { background: #e4f5ec; color: #2a6e42; }
+    .summary.has-fail { background: #fce8e6; color: #b8433a; }
+  </style>
+</head>
+<body>
+  <h1>UniWallet:Validation Tests</h1>
+  <div id="results"></div>
+  <div id="summary"></div>
+
+ 
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/validators.js"></script>
+  <script src="scripts/search.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var results = document.getElementById('results');
+      var passed = 0;
+      var failed = 0;
+
+      function assert(testName, condition) {
+        var div = document.createElement('div');
+        div.className = 'test ' + (condition ? 'pass' : 'fail');
+        div.textContent = (condition ? 'PASS' : 'FAIL') + ' — ' + testName;
+        results.appendChild(div);
+        if (condition) passed++;
+        else failed++;
+      }
+
+      function section(title) {
+        var h2 = document.createElement('h2');
+        h2.textContent = title;
+        results.appendChild(h2);
+      }
+
+     
+      section('Description Validation');
+
+      assert('Valid: "Lunch at cafeteria"',
+        Validators.validateDescription('Lunch at cafeteria').valid === true);
+
+      assert('Valid: single word "Coffee"',
+        Validators.validateDescription('Coffee').valid === true);
+
+      assert('Invalid: empty string',
+        Validators.validateDescription('').valid === false);
+
+      assert('Invalid: leading space " Lunch"',
+        Validators.validateDescription(' Lunch').valid === false);
+
+      assert('Invalid: trailing space "Lunch "',
+        Validators.validateDescription('Lunch ').valid === false);
+
+      assert('Invalid: duplicate word "coffee coffee with friends"',
+        Validators.validateDescription('coffee coffee with friends').valid === false);
+
+      assert('Invalid: duplicate word mixed case "The the book"',
+        Validators.validateDescription('The the book').valid === false);
+
+      assert('Valid: similar but not duplicate "coffee coffees"',
+        Validators.validateDescription('coffee coffees').valid === true);
+
+     
+      section('Amount Validation');
+
+      assert('Valid: "12.50"',
+        Validators.validateAmount('12.50').valid === true);
+
+      assert('Valid: "100"',
+        Validators.validateAmount('100').valid === true);
+
+      assert('Valid: "0.99"',
+        Validators.validateAmount('0.99').valid === true);
+
+      assert('Valid: "0"',
+        Validators.validateAmount('0').valid === false); 
+
+      assert('Invalid: empty',
+        Validators.validateAmount('').valid === false);
+
+      assert('Invalid: "12.999" (3 decimals)',
+        Validators.validateAmount('12.999').valid === false);
+
+      assert('Invalid: "-5"',
+        Validators.validateAmount('-5').valid === false);
+
+      assert('Invalid: "abc"',
+        Validators.validateAmount('abc').valid === false);
+
+      assert('Invalid: "01" (leading zero)',
+        Validators.validateAmount('01').valid === false);
+
+    
+      section('Date Validation');
+
+      assert('Valid: "2025-02-15"',
+        Validators.validateDate('2025-02-15').valid === true);
+
+      assert('Valid: "2025-12-31"',
+        Validators.validateDate('2025-12-31').valid === true);
+
+      assert('Valid: "2025-01-01"',
+        Validators.validateDate('2025-01-01').valid === true);
+
+      assert('Invalid: empty',
+        Validators.validateDate('').valid === false);
+
+      assert('Invalid: "2025-13-01" (month 13)',
+        Validators.validateDate('2025-13-01').valid === false);
+
+      assert('Invalid: "2025-00-15" (month 0)',
+        Validators.validateDate('2025-00-15').valid === false);
+
+      assert('Invalid: "2025-02-30" (Feb 30 does not exist)',
+        Validators.validateDate('2025-02-30').valid === false);
+
+      assert('Invalid: "15-02-2025" (wrong order)',
+        Validators.validateDate('15-02-2025').valid === false);
+
+      assert('Invalid: "2025/02/15" (wrong separator)',
+        Validators.validateDate('2025/02/15').valid === false);
+
+      
+      section('Category Validation');
+
+      assert('Valid: "Food"',
+        Validators.validateCategory('Food').valid === true);
+
+      assert('Valid: "Self-Care"',
+        Validators.validateCategory('Self-Care').valid === true);
+
+      assert('Valid: "Eating Out"',
+        Validators.validateCategory('Eating Out').valid === true);
+
+      assert('Invalid: empty',
+        Validators.validateCategory('').valid === false);
+
+      assert('Invalid: "Food123"',
+        Validators.validateCategory('Food123').valid === false);
+
+      assert('Invalid: "Food & Drink" (ampersand)',
+        Validators.validateCategory('Food & Drink').valid === false);
+
+      assert('Invalid: "  Food" (leading space)',
+        Validators.validateCategory('  Food').valid === false);
+
+     
+      section('Regex Pattern Direct Tests');
+
+      assert('Duplicate word pattern matches "the the"',
+        Validators.patterns.duplicateWord.test('the the'));
+
+      assert('Duplicate word pattern matches "very very good"',
+        Validators.patterns.duplicateWord.test('very very good'));
+
+      assert('Duplicate word pattern does NOT match "then the"',
+        !Validators.patterns.duplicateWord.test('then the'));
+
+      assert('Strong check matches "Hello1World"',
+        Validators.patterns.strongCheck.test('Hello1World'));
+
+      assert('Strong check does NOT match "alllowercase"',
+        !Validators.patterns.strongCheck.test('alllowercase'));
+
+      assert('Strong check does NOT match "ALLUPPER"',
+        !Validators.patterns.strongCheck.test('ALLUPPER'));
+
+   
+      section('Search — Regex Compiler');
+
+      assert('compileRegex returns RegExp for valid pattern',
+        Search.compileRegex('hello') instanceof RegExp);
+
+      assert('compileRegex returns null for invalid pattern "[["',
+        Search.compileRegex('[[') === null);
+
+      assert('compileRegex returns null for empty string',
+        Search.compileRegex('') === null);
+
+      assert('compileRegex with flags works',
+        Search.compileRegex('test', 'gi') instanceof RegExp);
+
+      section('Search — Highlight');
+
+      var re = Search.compileRegex('lunch', 'gi');
+      var hlResult = Search.highlight('Lunch at cafe', re);
+      assert('highlight wraps match in <mark> tags',
+        hlResult.indexOf('<mark>') !== -1 && hlResult.indexOf('</mark>') !== -1);
+
+      assert('highlight preserves non-matching text',
+        Search.highlight('Dinner at cafe', re) === 'Dinner at cafe');
+
+    
+      var dangerousInput = String.fromCharCode(60) + 'b' + String.fromCharCode(62) + 'bold' + String.fromCharCode(60) + '/b' + String.fromCharCode(62);
+      var escapedResult = Search.highlight(dangerousInput, null);
+      assert('highlight escapes angle brackets to prevent XSS',
+        escapedResult.indexOf(String.fromCharCode(60) + 'b' + String.fromCharCode(62)) === -1);
+
+      assert('highlight output contains escaped lt entity',
+        escapedResult.indexOf(String.fromCharCode(38) + 'lt;') !== -1);
+
+      assert('highlight output contains escaped gt entity',
+        escapedResult.indexOf(String.fromCharCode(38) + 'gt;') !== -1);
+
+      assert('escapeHTML converts ampersands',
+        Search.escapeHTML('A & B').indexOf(String.fromCharCode(38) + 'amp;') !== -1);
+
+      assert('escapeHTML converts double quotes',
+        Search.escapeHTML('say "hello"').indexOf(String.fromCharCode(38) + 'quot;') !== -1);
+
+      assert('highlight with null regex returns escaped text',
+        Search.highlight('Hello', null) === 'Hello');
+
+      assert('highlight with empty text returns empty string',
+        Search.highlight('', re) === '');
+
+      section('Search — Filter Records');
+
+      var testRecords = [
+        { id: '1', description: 'Coffee at campus', amount: 5.50, category: 'Food', date: '2025-02-10' },
+        { id: '2', description: 'Bus ticket', amount: 2.00, category: 'Transport', date: '2025-02-11' },
+        { id: '3', description: 'Tea and biscuits', amount: 3.25, category: 'Food', date: '2025-02-12' }
+      ];
+
+      var coffeeRe = Search.compileRegex('coffee', 'i');
+      var coffeeResults = Search.filterRecords(testRecords, coffeeRe);
+      assert('Filter finds "coffee" in 1 record', coffeeResults.length === 1);
+
+      var foodRe = Search.compileRegex('Food', 'i');
+      var foodResults = Search.filterRecords(testRecords, foodRe);
+      assert('Filter finds "Food" category in 2 records', foodResults.length === 2);
+
+      var beverageRe = Search.compileRegex('(coffee|tea)', 'i');
+      var beverageResults = Search.filterRecords(testRecords, beverageRe);
+      assert('Filter finds beverages (coffee|tea) in 2 records', beverageResults.length === 2);
+
+      var centsRe = Search.compileRegex('\\.\\d{2}\\b', 'g');
+     
+      var centsResults = Search.filterRecords(testRecords, centsRe);
+      assert('Cents pattern matches amounts with decimals', centsResults.length >= 1);
+
+
+      section('Import Data Validation');
+
+      assert('Valid import data passes',
+        Storage.validateImportData([
+          { id: 'txn_1', description: 'Test', amount: 10, category: 'Food', date: '2025-01-01' }
+        ]).valid === true);
+
+      assert('Non-array fails', Storage.validateImportData('not an array').valid === false);
+      assert('Empty array fails', Storage.validateImportData([]).valid === false);
+
+      assert('Missing field fails',
+        Storage.validateImportData([{ id: 'txn_1', description: 'Test' }]).valid === false);
+
+      assert('Negative amount fails',
+        Storage.validateImportData([
+          { id: 'txn_1', description: 'Test', amount: -5, category: 'Food', date: '2025-01-01' }
+        ]).valid === false);
+
+ 
+      var summary = document.getElementById('summary');
+      var total = passed + failed;
+      summary.className = 'summary ' + (failed === 0 ? 'all-pass' : 'has-fail');
+      summary.textContent = passed + ' of ' + total + ' tests passed.' + (failed > 0 ? ' ' + failed + ' failed!' : ' All good!');
+
+    })();
+  </script>
+</body>
+</html>
