@@ -41,7 +41,7 @@ https://github.com/MAcDen34/-Student-Finance-Tracker_summative-LAb.git
 Live Demo (GitHub Pages):
 https://macden34.github.io/-Student-Finance-Tracker_summative-LAb/
 
-🎥 Demo Video: Coming Soon
+🎥 Demo Video: https://drive.google.com/file/d/1o3-z5BaoW6gpcNv8lWjfM5f4HtWk2g4h/view?usp=sharing
 
 Installation & Setup
 
